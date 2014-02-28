@@ -1,13 +1,14 @@
 #!/usr/bin/python
 # -*- coding:utf8 -*-
-import rospy, os, sys, rospy, curses, time, cv2#, cv_bridge
+import rospy, os, sys, curses, time, cv2
 import numpy as np
 from curses import wrapper
 from threading import Thread
 from geometry_msgs.msg import Twist, Pose
-from mine_detection.msg._Coil import Coil
+from metal_detector_msgs.msg._Coil import Coil
 from numpy import deg2rad
 from sensor_msgs.msg import CameraInfo, CompressedImage, LaserScan, Imu
+from std_msgs.msg import Bool, Float64
 
 # read/write stuff on screen
 std = None  
@@ -15,7 +16,7 @@ std = None
 # Robot data
 t = Twist()
 pose = Pose()
-radStep = deg2rad(5)
+radStep = deg2rad(15)
 
 #laser information
 laserInfo = LaserScan()
@@ -97,7 +98,8 @@ def showStats():
     std.addstr(12, 3, "Zeros: {}".format(coil.zero))
     std.addstr(14, 0, "Right Camera Width {} \t Height {}".format(rightCamInfo.width, rightCamInfo.height))
     std.addstr(15, 0, "Left  Camera Width {} \t Height {}".format(leftCamInfo.width, leftCamInfo.height))
-    std.addstr(17, 0 , "Laser Readings {} Laser Range Min {} \t Laser Range Max {}".format( len(laserInfo.ranges), laserInfo.range_min, laserInfo.range_max))
+    if laserInfo.ranges != []:
+        std.addstr(17, 0 , "Laser Readings {} Laser Range Min {:0.4f} Laser Range Max {:0.4f}".format( len(laserInfo.ranges), min(laserInfo.ranges), max(laserInfo.ranges)))
     std.addstr(19, 0, "IMU Quaternion w: {:0.4f} x: {:0.4f} y: {:0.4f} z: {:0.4f} ".format(imuInfo.orientation.w, imuInfo.orientation.x, imuInfo.orientation.y, imuInfo.orientation.z))
     
 
@@ -112,9 +114,28 @@ def KeyCheck(stdscr):
     k = None
     global std
     std = stdscr
-    pubMine = rospy.Publisher('/HRATC_FW/set_mine', Pose)
-    # pubVel = rospy.Publisher('/husky/cmd_vel', Twist) # non_constant speed
-    pubVel = rospy.Publisher('/husky/cmd_vel', Twist) #constant speed
+
+
+    #publishing topics
+    pubMine  = rospy.Publisher('/HRATC_FW/set_mine', Pose)
+    pubVel   = rospy.Publisher('/husky/cmd_vel', Twist)
+
+    # Pan & Tilt Unit - both pan and tilt accept values from -0.5 to 0.5 rad
+    pubPTUpan = rospy.Publisher('/ptu_d46/pan_position_controller/command', Float64)
+    pubPTUtilt = rospy.Publisher('/ptu_d46/tilt_position_controller/command', Float64)
+    PTUpanValue = 0.0
+    PTUtiltValue= 0.0
+
+    # Arm
+    # Automatic arm sweeping
+    pubAutoArmSweep = rospy.Publisher('/arm/sweep', Bool)
+    isAutoSweeping = False
+    # Manual arm sweeping - the sweep joint accepts values from -0.8 to 0.8
+    pubManualArmSweep = rospy.Publisher('/arm/sweep_controller/command', Float64)
+    armSweepValue = 0.0
+    # Manual arm lifting - the lift joint accepts values from -0.5 to 0.15
+    pubManualArmLift  = rospy.Publisher('/arm/lift_controller/command', Float64)
+    armLiftValue = 0.0
 
     # While 'Esc' is not pressed
     while k != chr(27):
@@ -124,6 +145,58 @@ def KeyCheck(stdscr):
         except:
             k = None
         
+        # Set mine position: IRREVERSIBLE ONCE SET
+        if k == "x":
+            pubMine.publish(pose)
+
+        # Arm movement
+        if k == "y":
+            isAutoSweeping = not(isAutoSweeping)
+            pubAutoArmSweep.publish(Bool(isAutoSweeping)) # toggle automatic arm sweeping
+        if k == "u":
+            armSweepValue+= 0.1
+            if armSweepValue > 0.8:
+                armSweepValue = 0.8
+            pubManualArmSweep.publish(armSweepValue) 
+        if k == "i":
+            armSweepValue -= 0.1
+            if armSweepValue < -0.8:
+                armSweepValue = -0.8
+            pubManualArmSweep.publish(armSweepValue)
+        if k == "o":
+            armLiftValue+= 0.1
+            if armLiftValue > 0.15:
+                armLiftValue = 0.15
+            pubManualArmLift.publish(armLiftValue)
+        if k == "p":
+            armLiftValue-= 0.1
+            if armLiftValue < -0.5:
+                armLiftValue = -0.5
+            pubManualArmLift.publish(armLiftValue)
+
+        # PTU movement
+        if k == "h":
+            PTUpanValue+= 0.1
+            if PTUpanValue > 0.5:
+                PTUpanValue = 0.5
+            pubPTUpan.publish(PTUpanValue) 
+        if k == "j":
+            PTUpanValue -= 0.1
+            if PTUpanValue < -0.5:
+                PTUpanValue = -0.5
+            pubPTUpan.publish(PTUpanValue)
+        if k == "k":
+            PTUtiltValue+= 0.1
+            if PTUtiltValue > 0.5:
+                PTUtiltValue = 0.5
+            pubPTUtilt.publish(PTUtiltValue)
+        if k == "l":
+            PTUtiltValue-= 0.1
+            if PTUtiltValue < -0.5:
+                PTUtiltValue = -0.5
+            pubPTUtilt.publish(PTUtiltValue)
+ 
+        # Robot movement
         if k == " ":
             t.linear.x  = 0.0           
             t.angular.z = 0.0
@@ -135,16 +208,9 @@ def KeyCheck(stdscr):
             t.linear.x =  1.0
         if k == "KEY_DOWN":
             t.linear.x = -1.0
-        if k == "x":
-            pubMine.publish(pose)
 
-        t.angular.z = min(t.angular.z,deg2rad(45))
-        t.angular.z = max(t.angular.z,deg2rad(-45))
-        
-
-        # if using const velocity update only when needed, otherwise erase the if
-        #if k!= None:
-        #    pubVel.publish(t)    
+        t.angular.z = min(t.angular.z,deg2rad(90))
+        t.angular.z = max(t.angular.z,deg2rad(-90))
         pubVel.publish(t)
 
         showStats()
