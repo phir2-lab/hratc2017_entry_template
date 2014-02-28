@@ -152,7 +152,8 @@ int main(int argc, char** argv)
         // If there is an obstacle or if we are at the edge of the admissible area set a new direction
         if(robot.obstacle() || robot.x() < min_x || robot.x() > max_x || robot.y() < min_y || robot.y() > max_y)
         {
-
+            srand(time(NULL));
+            target_yaw = angles::normalize_angle(robot.yaw()+M_PI) + ((double(rand()) / double(RAND_MAX)) * M_PI/4 - M_PI/8);
         }
 
         robot.setSpeed(max_linear_speed, angular_speed*angles::shortest_angular_distance(robot.yaw(), target_yaw)*a);
