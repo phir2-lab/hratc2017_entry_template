@@ -6,9 +6,13 @@ project(hratc2014_entry_template)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   metal_detector_msgs
-  rosccp
+  roscpp
   rospy
   tf
+  message_filters
+  move_base_msgs
+  actionlib
+  angles
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,6 +109,9 @@ include_directories(
 
 ## Declare a cpp executable
 # add_executable(hratc2014_entry_template_node src/hratc2014_entry_template_node.cpp)
+add_executable(random_walk_navigation_node examples/cpp/random_walk_navigation.cpp)
+#add_executable(random_walk_simple_node examples/cpp/random_walk_simple.cpp)
+add_executable(read_metal_detector_node examples/cpp/read_metal_detector.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -114,6 +121,9 @@ include_directories(
 # target_link_libraries(hratc2014_entry_template_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(random_walk_navigation_node ${catkin_LIBRARIES})
+#target_link_libraries(random_walk_simple_node ${catkin_LIBRARIES})
+target_link_libraries(read_metal_detector_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##
