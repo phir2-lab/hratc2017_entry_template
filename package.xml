@@ -21,7 +21,7 @@
   <build_depend>angles</build_depend>
   
   <run_depend>metal_detector_msgs</run_depend>
-  <run_depend>roscp</run_depend>
+  <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>message_filters</run_depend>
