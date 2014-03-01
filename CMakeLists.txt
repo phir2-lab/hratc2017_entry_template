@@ -110,7 +110,7 @@ include_directories(
 ## Declare a cpp executable
 # add_executable(hratc2014_entry_template_node src/hratc2014_entry_template_node.cpp)
 add_executable(random_walk_navigation_node examples/cpp/random_walk_navigation.cpp)
-#add_executable(random_walk_simple_node examples/cpp/random_walk_simple.cpp)
+add_executable(random_walk_simple_node examples/cpp/random_walk_simple.cpp)
 add_executable(read_metal_detector_node examples/cpp/read_metal_detector.cpp)
 
 ## Add cmake target dependencies of the executable/library
@@ -122,7 +122,7 @@ add_executable(read_metal_detector_node examples/cpp/read_metal_detector.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(random_walk_navigation_node ${catkin_LIBRARIES})
-#target_link_libraries(random_walk_simple_node ${catkin_LIBRARIES})
+target_link_libraries(random_walk_simple_node ${catkin_LIBRARIES})
 target_link_libraries(read_metal_detector_node ${catkin_LIBRARIES})
 
 #############

@@ -46,6 +46,7 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <angles/angles.h>
+#include <tf/tf.h>
 
 class Robot
 {
@@ -62,6 +63,7 @@ public:
 
 private:
     void laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
+    void odomCallback(const nav_msgs::Odometry::ConstPtr& msg);
 
     ros::NodeHandle n_;
 
@@ -88,7 +90,8 @@ Robot::Robot() : n_()
 
 void Robot::laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-    std::vector<double>::iterator range_it = std::min_element(msg->ranges.begin(), msg->ranges.end());
+    std::vector<float> ranges(msg->ranges.begin(), msg->ranges.end());
+    std::vector<float>::iterator range_it = std::min_element(ranges.begin(), ranges.end());
 
     if(*range_it < min_range_) obstacle_ = true;
     else obstacle_ = false;
@@ -105,7 +108,7 @@ void Robot::setSpeed(double linear_speed, double angular_speed)
 {
     geometry_msgs::Twist msg;
     msg.linear.x = linear_speed;
-    msg.angular.z = angular.speed;
+    msg.angular.z = angular_speed;
     cmd_vel_pub_.publish(msg);
 }
 
@@ -142,7 +145,7 @@ int main(int argc, char** argv)
     Robot robot;
     robot.setRangeLimit(min_range);
 
-    double target_yaw = ;
+    double target_yaw = (double(rand()) / double(RAND_MAX)) * 2*M_PI - M_PI;
 
     double a = 5;
 
@@ -156,7 +159,7 @@ int main(int argc, char** argv)
             target_yaw = angles::normalize_angle(robot.yaw()+M_PI) + ((double(rand()) / double(RAND_MAX)) * M_PI/4 - M_PI/8);
         }
 
-        robot.setSpeed(max_linear_speed, angular_speed*angles::shortest_angular_distance(robot.yaw(), target_yaw)*a);
+        robot.setSpeed(max_linear_speed, max_angular_speed*angles::shortest_angular_distance(robot.yaw(), target_yaw)*a);
 
         ros::spinOnce();
         r.sleep();
