@@ -1,14 +1,16 @@
 #!/usr/bin/python
 # -*- coding:utf8 -*-
-import rospy, os, sys, curses, time, cv2
+import rospy, os, sys, curses, time, cv2, tf
 import numpy as np
+from numpy import deg2rad, cos, sin
 from curses import wrapper
 from threading import Thread
-from geometry_msgs.msg import Twist, Pose
+from geometry_msgs.msg import Twist, Pose, PoseWithCovariance, PoseWithCovarianceStamped
 from metal_detector_msgs.msg._Coil import Coil
-from numpy import deg2rad
-from sensor_msgs.msg import CameraInfo, CompressedImage, LaserScan, Imu
+from sensor_msgs.msg import LaserScan, Imu
 from std_msgs.msg import Bool, Float64
+from nav_msgs.msg import Odometry
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 # read/write stuff on screen
 std = None  
@@ -16,7 +18,9 @@ std = None
 # Robot data
 t = Twist()
 pose = Pose()
+ekfOdom =  Odometry()
 radStep = deg2rad(15)
+transListener = None
 
 #laser information
 laserInfo = LaserScan()
@@ -25,22 +29,21 @@ laserInfo = LaserScan()
 imuInfo = Imu()
 
 #Metal detector data
-coil = Coil()
-
-# Camera data 
-size = 800, 800, 3
-leftCamInfo = CameraInfo()
-rightCamInfo = CameraInfo()
-leftCamFrame = CompressedImage()
-rightCamFrame = CompressedImage()
-cv2.namedWindow("Left window", 1)
-cv2.namedWindow("Right window",1)
-
+leftCoil = Coil()
+middleCoil = Coil()
+rightCoil = Coil()
 
 # Mine Detection Callback
-def receiveMineDetection(actualCoil):
-    global coil
-    coil = actualCoil
+def receiveCoilSignal(actualCoil):
+    if actualCoil.header.frame_id == "metal_detector_left_coil":
+        global leftCoil
+        leftCoil = actualCoil
+    elif actualCoil.header.frame_id == "metal_detector_middle_coil":
+        global middleCoil
+        middleCoil = actualCoil
+    elif actualCoil.header.frame_id == "metal_detector_right_coil":
+        global rightCoil
+        rightCoil = actualCoil
 
 # Position callback
 def receivePosition(actualPose):
@@ -48,38 +51,40 @@ def receivePosition(actualPose):
     pose = actualPose
     showStats()
 
-# Camera basic information callbacks
-def receiveRightCameraInfo(rightInfNow):
-    global rightCamInfo
-    rightCamInfo = rightInfNow
-
-def receiveLeftCameraInfo(leftInfNow):
-    global leftCamInfo
-    leftCamInfo = leftInfNow
-
-def receiveRightFrame(rightFrameNow):
-    np_arr = np.fromstring(rightFrameNow.data, np.uint8)
-    rightFrameNow = cv2.imdecode(np_arr, cv2.CV_LOAD_IMAGE_COLOR)
-    cv2.imshow("Right window", rightFrameNow)
-    cv2.waitKey(3)
-
-def receiveLeftFrame(leftFrameNow):
-    np_arr = np.fromstring(leftFrameNow.data, np.uint8)
-    leftCamFrame = cv2.imdecode(np_arr, cv2.CV_LOAD_IMAGE_COLOR)
-    cv2.imshow("Left window", leftCamFrame)
-    cv2.waitKey(3)
+def receiveEKFOdom(actualOdometry):
+    global ekfOdom 
+    ekfOdom = actualOdometry
+    showStats()
 
 # Laser range-finder callback
 def receiveLaser(LaserNow):
     global laserInfo 
     laserInfo = LaserNow
 
-
 # IMU data callback
 def receiveImu(ImuNow):
     global imuInfo 
     imuInfo = ImuNow
 
+# Send mine position to HRATC Framework
+def sendMine():
+    global transListener, pose
+
+    minePose = Pose()
+
+    # Change middle coil position into world position
+    try:    
+        (trans,rot) = transListener.lookupTransform('base_footprint', 'middle_coil', rospy.Time(0))
+    except:
+        return
+    cx, cy, cz = trans
+    q = (pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
+    roll, pitch, yaw = euler_from_quaternion(q)
+    minePose.position.x = pose.position.x + cx*cos(yaw) - cy*sin(yaw)
+    minePose.position.y = pose.position.y + cx*sin(yaw) + cy*cos(yaw)
+
+    pubMine  = rospy.Publisher('/HRATC_FW/set_mine', Pose)
+    pubMine.publish(minePose)
     
 # Printing stuff on screen
 def showStats():
@@ -93,16 +98,20 @@ def showStats():
     std.addstr(5, 0, "{} \t {} \t {}".format(t.angular.x,t.angular.y,t.angular.z))
     std.addstr(7,0,"Actual Position:")
     std.addstr(8, 0, "{} \t {} \t {}".format(pose.position.x,pose.position.y,pose.position.z))
-    std.addstr(10,0,"Actual Coils:")
-    std.addstr(11, 3, "Channels: {}".format(coil.channel))
-    std.addstr(12, 3, "Zeros: {}".format(coil.zero))
-    std.addstr(14, 0, "Right Camera Width {} \t Height {}".format(rightCamInfo.width, rightCamInfo.height))
-    std.addstr(15, 0, "Left  Camera Width {} \t Height {}".format(leftCamInfo.width, leftCamInfo.height))
-    if laserInfo.ranges != []:
-        std.addstr(17, 0 , "Laser Readings {} Laser Range Min {:0.4f} Laser Range Max {:0.4f}".format( len(laserInfo.ranges), min(laserInfo.ranges), max(laserInfo.ranges)))
-    std.addstr(19, 0, "IMU Quaternion w: {:0.4f} x: {:0.4f} y: {:0.4f} z: {:0.4f} ".format(imuInfo.orientation.w, imuInfo.orientation.x, imuInfo.orientation.y, imuInfo.orientation.z))
-    
+    std.addstr(9, 0, "{} \t {} \t {}".format(ekfOdom.pose.pose.position.x,ekfOdom.pose.pose.position.y,ekfOdom.pose.pose.position.z))
+    std.addstr(10,0,"Left Coil:")
+    std.addstr(11, 3, "Channels: {}".format(leftCoil.channel))
+    std.addstr(12, 3, "Zeros: {}".format(leftCoil.zero))
+    std.addstr(13,0,"Middle Coil:")
+    std.addstr(14, 3, "Channels: {}".format(middleCoil.channel))
+    std.addstr(15, 3, "Zeros: {}".format(middleCoil.zero))
+    std.addstr(16,0,"Right Coil:")
+    std.addstr(17, 3, "Channels: {}".format(rightCoil.channel))
+    std.addstr(18, 3, "Zeros: {}".format(rightCoil.zero))
 
+    std.addstr(20, 0, "IMU Quaternion w: {:0.4f} x: {:0.4f} y: {:0.4f} z: {:0.4f} ".format(imuInfo.orientation.w, imuInfo.orientation.x, imuInfo.orientation.y, imuInfo.orientation.z))
+    if laserInfo.ranges != []:
+        std.addstr(21, 0 , "Laser Readings {} Laser Range Min {:0.4f} Laser Range Max {:0.4f}".format( len(laserInfo.ranges), min(laserInfo.ranges), max(laserInfo.ranges)))
 
     std.refresh()
 
@@ -115,9 +124,7 @@ def KeyCheck(stdscr):
     global std
     std = stdscr
 
-
     #publishing topics
-    pubMine  = rospy.Publisher('/HRATC_FW/set_mine', Pose)
     pubVel   = rospy.Publisher('/husky/cmd_vel', Twist)
 
     # Pan & Tilt Unit - both pan and tilt accept values from -0.5 to 0.5 rad
@@ -147,7 +154,7 @@ def KeyCheck(stdscr):
         
         # Set mine position: IRREVERSIBLE ONCE SET
         if k == "x":
-            pubMine.publish(pose)
+            sendMine()
 
         # Arm movement
         if k == "y":
@@ -227,20 +234,19 @@ def StartControl():
 def spin():
     rospy.spin()
 
-
 if __name__ == '__main__':
     # Initialize client node
     rospy.init_node('Competitor')
 
     # Subscribing to all these topics to bring the robot or simulation to live data
     rospy.Subscriber("/HRATC_FW/pose", Pose, receivePosition)
-    rospy.Subscriber("/HRATC_FW/mineDetection", Coil, receiveMineDetection)
-    rospy.Subscriber("/right_camera/camera_info", CameraInfo, receiveRightCameraInfo)
-    rospy.Subscriber("/left_camera/camera_info", CameraInfo, receiveLeftCameraInfo)
-    rospy.Subscriber("/right_camera/image_raw/compressed", CompressedImage, receiveRightFrame)
-    rospy.Subscriber("/left_camera/image_raw/compressed", CompressedImage, receiveLeftFrame)
+    rospy.Subscriber("/robot_pose_ekf/odom", PoseWithCovarianceStamped, receiveEKFOdom)
+    rospy.Subscriber("/coils", Coil, receiveCoilSignal)
     rospy.Subscriber("/imu_data", Imu, receiveImu)
     rospy.Subscriber("/scan", LaserScan, receiveLaser)
+
+    # Added a tf listener to check the position of the coils
+    transListener = tf.TransformListener()
 
     #Starting curses and ROS
     Thread(target = StartControl).start()
