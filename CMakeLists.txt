@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   move_base_msgs
   actionlib
   angles
+  laser_assembler
+  control_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -112,6 +114,7 @@ include_directories(
 add_executable(random_walk_navigation_node examples/cpp/random_walk_navigation.cpp)
 add_executable(random_walk_simple_node examples/cpp/random_walk_simple.cpp)
 add_executable(read_metal_detector_node examples/cpp/read_metal_detector.cpp)
+add_executable(pointcloud_generator_node examples/cpp/pointcloud_generator.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -124,6 +127,7 @@ add_executable(read_metal_detector_node examples/cpp/read_metal_detector.cpp)
 target_link_libraries(random_walk_navigation_node ${catkin_LIBRARIES})
 target_link_libraries(random_walk_simple_node ${catkin_LIBRARIES})
 target_link_libraries(read_metal_detector_node ${catkin_LIBRARIES})
+target_link_libraries(pointcloud_generator_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##

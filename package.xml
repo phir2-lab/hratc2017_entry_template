@@ -19,6 +19,8 @@
   <build_depend>move_base_msgs</build_depend>
   <build_depend>actionlib</build_depend>
   <build_depend>angles</build_depend>
+  <build_depend>laser_assembler</build_depend>
+  <build_depend>control_msgs</build_depend>
   
   <run_depend>metal_detector_msgs</run_depend>
   <run_depend>roscpp</run_depend>
@@ -29,5 +31,7 @@
   <run_depend>actionlib</run_depend>
   <run_depend>angles</run_depend>
   <run_depend>husky_navigation</run_depend>
+  <run_depend>laser_assembler</run_depend>
+  <run_depend>control_msgs</run_depend>
   
 </package>
