@@ -2,7 +2,7 @@
 *
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2013, ISR University of Coimbra.
+*  Copyright (c) 2014, ISR University of Coimbra.
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,16 @@
 *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 *  POSSIBILITY OF SUCH DAMAGE.
 *
-* Author: Goncalo Cabrita on 16/10/2013
+* Author: Gonçalo Cabrita on 28/02/2014
+*
+* This is ment to be an example file for the HRATC2104 Challenge.
+* In this example we show how to control the pan and tilt module
+* using an action server. This example is used to generate a 3D
+* point cloud by means of the laser assembler.
+*
+* With the simulator running:
+* roslaunch hratc2014_entry_template pointcloud_generator.launch
+*
 *********************************************************************/
 
 #include <ros/ros.h>

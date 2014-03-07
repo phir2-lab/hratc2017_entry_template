@@ -35,9 +35,11 @@
 * Author: Gonçalo Cabrita on 28/02/2014
 *
 * This is ment to be an example file for the HRATC2104 Challenge.
-* In this example a random walk algorithm is implemented using the ROS
-* navigation stack. A random goal is set, the navigation stack manages
-* path planning and obstacle avoidance.
+* In this example a random walk algorithm is implemented.
+* In this example we demonstrate how to subscribe to the odometry and
+* laser data and publish velocity commands to the robot. Note that there
+* is also a similar example that uses ROS' navigation stack, which we
+* would advise over controlling the robot directly.
 *
 *********************************************************************/
 
