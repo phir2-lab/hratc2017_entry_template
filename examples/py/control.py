@@ -8,9 +8,9 @@ from threading import Thread
 from geometry_msgs.msg import Twist, Pose, PoseWithCovariance, PoseWithCovarianceStamped
 from metal_detector_msgs.msg._Coil import Coil
 from sensor_msgs.msg import CameraInfo, CompressedImage, LaserScan, Imu
-from std_msgs.msg import Bool, Float64
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 # read/write stuff on screen
 std = None  
@@ -161,20 +161,15 @@ def KeyCheck(stdscr):
     pubVel   = rospy.Publisher('/husky/cmd_vel', Twist)
 
     # Pan & Tilt Unit - both pan and tilt accept values from -0.5 to 0.5 rad
-    pubPTUpan = rospy.Publisher('/ptu_d46/pan_position_controller/command', Float64)
-    pubPTUtilt = rospy.Publisher('/ptu_d46/tilt_position_controller/command', Float64)
+    pubPTU = rospy.Publisher('/ptu_d46_controller/command', JointTrajectory)
     PTUpanValue = 0.0
     PTUtiltValue= 0.0
 
     # Arm
-    # Automatic arm sweeping
-    pubAutoArmSweep = rospy.Publisher('/arm/sweep', Bool)
-    isAutoSweeping = False
+    pubManualArm = rospy.Publisher('/arm_controller/command', JointTrajector)
     # Manual arm sweeping - the sweep joint accepts values from -0.8 to 0.8
-    pubManualArmSweep = rospy.Publisher('/arm/sweep_controller/command', Float64)
     armSweepValue = 0.0
     # Manual arm lifting - the lift joint accepts values from -0.5 to 0.15
-    pubManualArmLift  = rospy.Publisher('/arm/lift_controller/command', Float64)
     armLiftValue = 0.0
 
     # While 'Esc' is not pressed
@@ -190,51 +185,48 @@ def KeyCheck(stdscr):
             sendMine()
 
         # Arm movement
-        if k == "y":
-            isAutoSweeping = not(isAutoSweeping)
-            pubAutoArmSweep.publish(Bool(isAutoSweeping)) # toggle automatic arm sweeping
         if k == "u":
             armSweepValue+= 0.1
             if armSweepValue > 0.8:
                 armSweepValue = 0.8
-            pubManualArmSweep.publish(armSweepValue) 
+            publishArm(armSweepValue, armLiftValue, pubArm)
         if k == "i":
             armSweepValue -= 0.1
             if armSweepValue < -0.8:
                 armSweepValue = -0.8
-            pubManualArmSweep.publish(armSweepValue)
+            publishArm(armSweepValue, armLiftValue, pubArm)
         if k == "o":
             armLiftValue+= 0.1
             if armLiftValue > 0.15:
                 armLiftValue = 0.15
-            pubManualArmLift.publish(armLiftValue)
+            publishArm(armSweepValue, armLiftValue, pubArm)
         if k == "p":
             armLiftValue-= 0.1
             if armLiftValue < -0.5:
                 armLiftValue = -0.5
-            pubManualArmLift.publish(armLiftValue)
+            publishArm(armSweepValue, armLiftValue, pubArm)
 
         # PTU movement
         if k == "h":
             PTUpanValue+= 0.1
             if PTUpanValue > 0.5:
                 PTUpanValue = 0.5
-            pubPTUpan.publish(PTUpanValue) 
+            publishPTU(PTUpanValue, PTUtiltValue, pubPTU)
         if k == "j":
             PTUpanValue -= 0.1
             if PTUpanValue < -0.5:
                 PTUpanValue = -0.5
-            pubPTUpan.publish(PTUpanValue)
+            publishPTU(PTUpanValue, PTUtiltValue, pubPTU)
         if k == "k":
             PTUtiltValue+= 0.1
             if PTUtiltValue > 0.5:
                 PTUtiltValue = 0.5
-            pubPTUtilt.publish(PTUtiltValue)
+            publishPTU(PTUpanValue, PTUtiltValue, pubPTU)
         if k == "l":
             PTUtiltValue-= 0.1
             if PTUtiltValue < -0.5:
                 PTUtiltValue = -0.5
-            pubPTUtilt.publish(PTUtiltValue)
+            publishPTU(PTUpanValue, PTUtiltValue, pubPTU)
  
         # Robot movement
         if k == " ":
@@ -258,6 +250,44 @@ def KeyCheck(stdscr):
 
     stdscr.keypad(False)
     rospy.signal_shutdown("Shutdown Competitor")
+
+def publishArm(armSweepValue, armLiftValue, pubArm):
+  msg = JointTrajectory()
+  msg.header.stamp = rospy.get_rostime()
+  msg.points.append(JointTrajectoryPoint())
+  msg.joint_names.append("upper_arm_joint")
+  msg.points[0].positions.append(armLiftValue)
+  msg.points[0].velocities.append(0.5)
+  msg.points[0].accelerations.append(0.5)
+  msg.joint_names.append("lower_arm_joint")
+  msg.points[0].positions.append(armLiftValue)
+  msg.points[0].velocities.append(0.5)
+  msg.points[0].accelerations.append(0.5)
+  msg.joint_names.append("metal_detector_arm_joint")
+  msg.points[0].positions.append(-1*armLiftValue)
+  msg.points[0].velocities.append(0.5)
+  msg.points[0].accelerations.append(0.5)
+  msg.joint_names.push_back("arm_axel_joint")
+  msg.points[0].positions.apend(armSweepValue)
+  msg.points[0].velocities.append(0.5)
+  msg.points[0].accelerations.append(0.5)
+  msg.points[0].time_from_start = rospy.Duration.from_sec(0.5)
+  pubArm.publish(msg)
+  
+def publishPTU(PTUpanValue, PTUtiltValue, pubPTU):
+  msg = JointTrajectory()
+  msg.header.stamp = rospy.get_rostime()
+  msg.points.append(JointTrajectoryPoint())
+  msg.joint_names.append("ptu_d46_pan_joint")
+  msg.points[0].positions.append(PTUpanValue)
+  msg.points[0].velocities.append(0.8)
+  msg.points[0].accelerations.append(0.8)
+  msg.joint_names.push_back("ptu_d46_tilt_joint")
+  msg.points[0].positions.apend(PTUtiltValue)
+  msg.points[0].velocities.append(0.8)
+  msg.points[0].accelerations.append(0.8)
+  msg.points[0].time_from_start = rospy.Duration.from_sec(0.5)
+  pubPTU.publish(msg)
 
 # Initialize curses stuff
 def StartControl():
