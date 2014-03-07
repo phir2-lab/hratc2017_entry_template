@@ -49,6 +49,7 @@
 #include <nav_msgs/Odometry.h>
 #include <angles/angles.h>
 #include <tf/tf.h>
+#include <trajectory_msgs/JointTrajectory.h>
 
 class Robot
 {
@@ -86,6 +87,7 @@ Robot::Robot() : n_()
 {
     cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/husky/cmd_vel", 10);
     laser_sub_ = n_.subscribe("scan", 10, &Robot::laserCallback, this);
+    odom_sub_ = n_.subscribe("robot_pose_ekf/odom", 10, &Robot::odomCallback, this);
 
     obstacle_ = false;
 }
@@ -94,6 +96,8 @@ void Robot::laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     std::vector<float> ranges(msg->ranges.begin(), msg->ranges.end());
     std::vector<float>::iterator range_it = std::min_element(ranges.begin(), ranges.end());
+
+    //ROS_INFO("Smallest range is %lf", *range_it);
 
     if(*range_it < min_range_) obstacle_ = true;
     else obstacle_ = false;
@@ -141,15 +145,35 @@ int main(int argc, char** argv)
     pn.param("min_y", min_y, -10.0);
     pn.param("max_y", max_y, 10.0);
     pn.param("min_range", min_range, 3.0);
-    pn.param("max_linear_speed", max_linear_speed, 0.6);
-    pn.param("max_angular_speed", max_angular_speed, 0.5);
+    pn.param("max_linear_speed", max_linear_speed, 0.4);
+    pn.param("max_angular_speed", max_angular_speed, 0.2);
+
+    // Lets just make sure the laser is on the upright position, otherwise we might see the arm as an obstacle!
+    ros::Publisher ptu_d46_pub = n.advertise<trajectory_msgs::JointTrajectory>("/ptu_d46_controller/command", 10);
+
+    trajectory_msgs::JointTrajectory msg;
+    msg.header.stamp = ros::Time::now();
+    msg.points.resize(1);
+    msg.joint_names.push_back("ptu_d46_pan_joint");
+    msg.points[0].positions.push_back(0.0);
+    msg.points[0].velocities.push_back(0.8);
+    msg.points[0].accelerations.push_back(0.8);
+    msg.joint_names.push_back("ptu_d46_tilt_joint");
+    msg.points[0].positions.push_back(0.5);
+    msg.points[0].velocities.push_back(0.8);
+    msg.points[0].accelerations.push_back(0.8);
+    msg.points[0].time_from_start = ros::Duration(1.0);
+
+    ros::Duration(1.0).sleep();
+
+    ptu_d46_pub.publish(msg);
 
     Robot robot;
     robot.setRangeLimit(min_range);
 
     double target_yaw = (double(rand()) / double(RAND_MAX)) * 2*M_PI - M_PI;
 
-    double a = 5;
+    double a = 1;
 
     ros::Rate r(10.0);
     while(ros::ok())
@@ -162,6 +186,7 @@ int main(int argc, char** argv)
         }
 
         robot.setSpeed(max_linear_speed, max_angular_speed*angles::shortest_angular_distance(robot.yaw(), target_yaw)*a);
+        //ROS_INFO("Linear %lf Angular %lf", max_linear_speed, max_angular_speed*angles::shortest_angular_distance(robot.yaw(), target_yaw)*a);
 
         ros::spinOnce();
         r.sleep();

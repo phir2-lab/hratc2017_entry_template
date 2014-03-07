@@ -45,6 +45,7 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include <tf/tf.h>
+#include <trajectory_msgs/JointTrajectory.h>
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
@@ -149,6 +150,26 @@ int main(int argc, char** argv)
     pn.param("max_x", max_x, 10.0);
     pn.param("min_y", min_y, -10.0);
     pn.param("max_y", max_y, 10.0);
+
+    // Lets just make sure the laser is on the upright position, otherwise we might see the arm as an obstacle!
+    ros::Publisher ptu_d46_pub = n.advertise<trajectory_msgs::JointTrajectory>("/ptu_d46_controller/command", 10);
+
+    trajectory_msgs::JointTrajectory msg;
+    msg.header.stamp = ros::Time::now();
+    msg.points.resize(1);
+    msg.joint_names.push_back("ptu_d46_pan_joint");
+    msg.points[0].positions.push_back(0.0);
+    msg.points[0].velocities.push_back(0.8);
+    msg.points[0].accelerations.push_back(0.8);
+    msg.joint_names.push_back("ptu_d46_tilt_joint");
+    msg.points[0].positions.push_back(0.5);
+    msg.points[0].velocities.push_back(0.8);
+    msg.points[0].accelerations.push_back(0.8);
+    msg.points[0].time_from_start = ros::Duration(1.0);
+
+    ros::Duration(1.0).sleep();
+
+    ptu_d46_pub.publish(msg);
 
     RandomWalk rw;
     rw.setLimits(min_x, max_x, min_y, max_y);

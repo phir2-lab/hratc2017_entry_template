@@ -35,13 +35,13 @@ rightCoil = Coil()
 
 # Mine Detection Callback
 def receiveCoilSignal(actualCoil):
-    if actualCoil.header.frame_id == "metal_detector_left_coil":
+    if actualCoil.header.frame_id == "left_coil":
         global leftCoil
         leftCoil = actualCoil
-    elif actualCoil.header.frame_id == "metal_detector_middle_coil":
+    elif actualCoil.header.frame_id == "middle_coil":
         global middleCoil
         middleCoil = actualCoil
-    elif actualCoil.header.frame_id == "metal_detector_right_coil":
+    elif actualCoil.header.frame_id == "right_coil":
         global rightCoil
         rightCoil = actualCoil
 
@@ -242,7 +242,7 @@ if __name__ == '__main__':
     rospy.Subscriber("/HRATC_FW/pose", Pose, receivePosition)
     rospy.Subscriber("/robot_pose_ekf/odom", PoseWithCovarianceStamped, receiveEKFOdom)
     rospy.Subscriber("/coils", Coil, receiveCoilSignal)
-    rospy.Subscriber("/imu_data", Imu, receiveImu)
+    rospy.Subscriber("/imu/data", Imu, receiveImu)
     rospy.Subscriber("/scan", LaserScan, receiveLaser)
 
     # Added a tf listener to check the position of the coils
