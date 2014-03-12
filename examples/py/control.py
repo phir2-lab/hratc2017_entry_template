@@ -5,7 +5,7 @@ import numpy as np
 from numpy import deg2rad, cos, sin
 from curses import wrapper
 from threading import Thread
-from geometry_msgs.msg import Twist, Pose, PoseWithCovariance, PoseWithCovarianceStamped
+from geometry_msgs.msg import Twist, Pose, PoseStamped, PoseWithCovariance, PoseWithCovarianceStamped
 from metal_detector_msgs.msg._Coil import Coil
 from sensor_msgs.msg import CameraInfo, CompressedImage, LaserScan, Imu
 from nav_msgs.msg import Odometry
@@ -101,7 +101,7 @@ def receiveImu(ImuNow):
 def sendMine():
     global transListener, pose
 
-    minePose = Pose()
+    minePose = PoseStamped()
 
     # Change middle coil position into world position
     try:    
@@ -111,10 +111,10 @@ def sendMine():
     cx, cy, cz = trans
     q = (pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
     roll, pitch, yaw = euler_from_quaternion(q)
-    minePose.position.x = pose.position.x + cx*cos(yaw) - cy*sin(yaw)
-    minePose.position.y = pose.position.y + cx*sin(yaw) + cy*cos(yaw)
+    minePose.pose.position.x = pose.position.x + cx*cos(yaw) - cy*sin(yaw)
+    minePose.pose.position.y = pose.position.y + cx*sin(yaw) + cy*cos(yaw)
 
-    pubMine  = rospy.Publisher('/HRATC_FW/set_mine', Pose)
+    pubMine  = rospy.Publisher('/HRATC_FW/set_mine', PoseStamped)
     pubMine.publish(minePose)
     
 # Printing stuff on screen

@@ -115,6 +115,7 @@ add_executable(random_walk_navigation_node examples/cpp/random_walk_navigation.c
 add_executable(random_walk_simple_node examples/cpp/random_walk_simple.cpp)
 add_executable(read_metal_detector_node examples/cpp/read_metal_detector.cpp)
 add_executable(pointcloud_generator_node examples/cpp/pointcloud_generator.cpp)
+add_executable(set_mine_node examples/cpp/set_mine.cpp)
 add_executable(sweep_node examples/cpp/sweep.cpp)
 
 ## Add cmake target dependencies of the executable/library
@@ -129,6 +130,7 @@ target_link_libraries(random_walk_navigation_node ${catkin_LIBRARIES})
 target_link_libraries(random_walk_simple_node ${catkin_LIBRARIES})
 target_link_libraries(read_metal_detector_node ${catkin_LIBRARIES})
 target_link_libraries(pointcloud_generator_node ${catkin_LIBRARIES})
+target_link_libraries(set_mine_node ${catkin_LIBRARIES})
 target_link_libraries(sweep_node ${catkin_LIBRARIES})
 
 #############
