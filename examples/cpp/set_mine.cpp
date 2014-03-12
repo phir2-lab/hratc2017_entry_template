@@ -62,23 +62,27 @@ int main(int argc, char **argv)
 
     ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("/HRATC_FW/set_mine", 1);
 
-    ros::Rate loop_rate(10);
-    while (ros::ok())
-    {
-        geometry_msgs::PoseStamped mine_pose;
-        mine_pose.header.stamp = ros::Time::now();
-        mine_pose.header.frame_id = frame_id;
-        // We're actually only using a point x y...
-        mine_pose.pose.position.x = x;
-        mine_pose.pose.position.y = y;
-        mine_pose.pose.position.z = 0.0;
-        mine_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
+    // We're just waiting for a subscriber, otherwise we would be publishing our first and only message to oblivion!
+    ros::Rate poll_rate(10);
+    while(pub.getNumSubscribers() == 0)
+        poll_rate.sleep();
 
-        pub.publish(mine_pose);
+    geometry_msgs::PoseStamped mine_pose;
+    mine_pose.header.stamp = ros::Time::now();
+    mine_pose.header.frame_id = frame_id;
+    // We're actually only using a point x y...
+    mine_pose.pose.position.x = x;
+    mine_pose.pose.position.y = y;
+    mine_pose.pose.position.z = 0.0;
+    mine_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
 
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
+    ROS_INFO("Setting a mine on x:%lf y:%lf", x, y);
+
+    pub.publish(mine_pose);
+
+    ROS_INFO("Press Ctrl+C to exit.");
+
+    ros::spin();
 
     return 0;
 }
