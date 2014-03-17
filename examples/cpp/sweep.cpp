@@ -76,21 +76,13 @@ int main(int argc, char **argv)
     {
         control_msgs::FollowJointTrajectoryGoal goal;
         goal.trajectory.header.stamp = ros::Time::now();
-        goal.trajectory.joint_names.resize(4);
+        goal.trajectory.joint_names.resize(2);
         goal.trajectory.points.resize(1);
         goal.trajectory.joint_names[0] = "upper_arm_joint";
         goal.trajectory.points[0].positions.push_back(height);
         goal.trajectory.points[0].velocities.push_back(speed);
         goal.trajectory.points[0].accelerations.push_back(acceleration);
-        goal.trajectory.joint_names[1] = "lower_arm_joint";
-        goal.trajectory.points[0].positions.push_back(height);
-        goal.trajectory.points[0].velocities.push_back(speed);
-        goal.trajectory.points[0].accelerations.push_back(acceleration);
-        goal.trajectory.joint_names[2] = "metal_detector_arm_joint";
-        goal.trajectory.points[0].positions.push_back(-1*height);
-        goal.trajectory.points[0].velocities.push_back(speed);
-        goal.trajectory.points[0].accelerations.push_back(acceleration);
-        goal.trajectory.joint_names[3] = "arm_axel_joint";
+        goal.trajectory.joint_names[1] = "arm_axel_joint";
         goal.trajectory.points[0].positions.push_back(position = position == min ? max : min);
         goal.trajectory.points[0].velocities.push_back(speed);
         goal.trajectory.points[0].accelerations.push_back(acceleration);
@@ -98,12 +90,8 @@ int main(int argc, char **argv)
         goal.goal_tolerance.resize(4);
         goal.goal_tolerance[0].name = "upper_arm_joint";
         goal.goal_tolerance[0].position = 0.01;
-        goal.goal_tolerance[1].name = "lower_arm_joint";
+        goal.goal_tolerance[1].name = "arm_axel_joint";
         goal.goal_tolerance[1].position = 0.01;
-        goal.goal_tolerance[2].name = "metal_detector_arm_joint";
-        goal.goal_tolerance[2].position = 0.01;
-        goal.goal_tolerance[3].name = "arm_axel_joint";
-        goal.goal_tolerance[3].position = 0.01;
         goal.goal_time_tolerance = ros::Duration(0.5);
 
         ac.sendGoal(goal);
