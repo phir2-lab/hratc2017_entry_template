@@ -166,7 +166,7 @@ def KeyCheck(stdscr):
     PTUtiltValue= 0.0
 
     # Arm
-    pubManualArm = rospy.Publisher('/arm_controller/command', JointTrajector)
+    pubManualArm = rospy.Publisher('/arm_controller/command', JointTrajectory)
     # Manual arm sweeping - the sweep joint accepts values from -0.8 to 0.8
     armSweepValue = 0.0
     # Manual arm lifting - the lift joint accepts values from -0.5 to 0.15
@@ -189,22 +189,22 @@ def KeyCheck(stdscr):
             armSweepValue+= 0.1
             if armSweepValue > 0.8:
                 armSweepValue = 0.8
-            publishArm(armSweepValue, armLiftValue, pubArm)
+            publishArm(armSweepValue, armLiftValue, pubManualArm)
         if k == "i":
             armSweepValue -= 0.1
             if armSweepValue < -0.8:
                 armSweepValue = -0.8
-            publishArm(armSweepValue, armLiftValue, pubArm)
+            publishArm(armSweepValue, armLiftValue, pubManualArm)
         if k == "o":
             armLiftValue+= 0.1
             if armLiftValue > 0.15:
                 armLiftValue = 0.15
-            publishArm(armSweepValue, armLiftValue, pubArm)
+            publishArm(armSweepValue, armLiftValue, pubManualArm)
         if k == "p":
             armLiftValue-= 0.1
             if armLiftValue < -0.5:
                 armLiftValue = -0.5
-            publishArm(armSweepValue, armLiftValue, pubArm)
+            publishArm(armSweepValue, armLiftValue, pubManualArm)
 
         # PTU movement
         if k == "h":
@@ -259,8 +259,8 @@ def publishArm(armSweepValue, armLiftValue, pubArm):
   msg.points[0].positions.append(armLiftValue)
   msg.points[0].velocities.append(0.5)
   msg.points[0].accelerations.append(0.5)
-  msg.joint_names.push_back("arm_axel_joint")
-  msg.points[0].positions.apend(armSweepValue)
+  msg.joint_names.append("arm_axel_joint")
+  msg.points[0].positions.append(armSweepValue)
   msg.points[0].velocities.append(0.5)
   msg.points[0].accelerations.append(0.5)
   msg.points[0].time_from_start = rospy.Duration.from_sec(0.5)
@@ -274,8 +274,8 @@ def publishPTU(PTUpanValue, PTUtiltValue, pubPTU):
   msg.points[0].positions.append(PTUpanValue)
   msg.points[0].velocities.append(0.8)
   msg.points[0].accelerations.append(0.8)
-  msg.joint_names.push_back("ptu_d46_tilt_joint")
-  msg.points[0].positions.apend(PTUtiltValue)
+  msg.joint_names.append("ptu_d46_tilt_joint")
+  msg.points[0].positions.append(PTUtiltValue)
   msg.points[0].velocities.append(0.8)
   msg.points[0].accelerations.append(0.8)
   msg.points[0].time_from_start = rospy.Duration.from_sec(0.5)
