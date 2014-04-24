@@ -84,7 +84,7 @@ void RandomWalk::sendNewGoal()
 {
     move_base_msgs::MoveBaseGoal goal;
 
-    goal.target_pose.header.frame_id = "/odom";
+    goal.target_pose.header.frame_id = "minefield";
     goal.target_pose.header.stamp = ros::Time::now();
 
     srand(time(NULL));

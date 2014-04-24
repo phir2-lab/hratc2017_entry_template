@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     double y;
     pn.param("y", y, 0.0);
     std::string frame_id;
-    pn.param<std::string>("frame_id", frame_id, "odom");
+    pn.param<std::string>("frame_id", frame_id, "minefield");
 
     ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("/HRATC_FW/set_mine", 1);
 

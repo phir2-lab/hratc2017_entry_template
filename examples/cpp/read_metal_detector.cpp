@@ -53,7 +53,7 @@
 class MetalDetector
 {
 public:
-    MetalDetector() : tf_(),  target_frame_("odom")
+    MetalDetector() : tf_(),  target_frame_("minefield")
     {
         md_sub_.subscribe(n_, "coils", 10);
         tf_filter_ = new tf::MessageFilter<metal_detector_msgs::Coil>(md_sub_, tf_, target_frame_, 10);

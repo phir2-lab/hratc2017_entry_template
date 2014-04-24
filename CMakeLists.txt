@@ -117,6 +117,7 @@ add_executable(read_metal_detector_node examples/cpp/read_metal_detector.cpp)
 add_executable(pointcloud_generator_node examples/cpp/pointcloud_generator.cpp)
 add_executable(set_mine_node examples/cpp/set_mine.cpp)
 add_executable(sweep_node examples/cpp/sweep.cpp)
+add_executable(get_global_odom_node examples/cpp/get_global_odom.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -132,6 +133,7 @@ target_link_libraries(read_metal_detector_node ${catkin_LIBRARIES})
 target_link_libraries(pointcloud_generator_node ${catkin_LIBRARIES})
 target_link_libraries(set_mine_node ${catkin_LIBRARIES})
 target_link_libraries(sweep_node ${catkin_LIBRARIES})
+target_link_libraries(get_global_odom_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##
