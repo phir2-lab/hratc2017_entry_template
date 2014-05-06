@@ -49,26 +49,27 @@
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
 #include <nav_msgs/Odometry.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 class GlobalPose
 {
 public:
     GlobalPose() : tf_(),  target_frame_("minefield")
     {
-        sub_.subscribe(n_, "/graft_ukf_absolute/odom_combined", 10);
-        tf_filter_ = new tf::MessageFilter<nav_msgs::Odometry>(sub_, tf_, target_frame_, 10);
+        sub_.subscribe(n_, "/robot_pose_ekf/odom", 10);
+        tf_filter_ = new tf::MessageFilter<geometry_msgs::PoseWithCovarianceStamped>(sub_, tf_, target_frame_, 10);
         tf_filter_->registerCallback( boost::bind(&GlobalPose::msgCallback, this, _1) );
     }
 
 private:
-    message_filters::Subscriber<nav_msgs::Odometry> sub_;
+    message_filters::Subscriber<geometry_msgs::PoseWithCovarianceStamped> sub_;
     tf::TransformListener tf_;
-    tf::MessageFilter<nav_msgs::Odometry> * tf_filter_;
+    tf::MessageFilter<geometry_msgs::PoseWithCovarianceStamped> * tf_filter_;
     ros::NodeHandle n_;
     std::string target_frame_;
 
     //  Callback to register with tf::MessageFilter to be called when transforms are available
-    void msgCallback(const boost::shared_ptr<const nav_msgs::Odometry>& msg)
+    void msgCallback(const boost::shared_ptr<const geometry_msgs::PoseWithCovarianceStamped>& msg)
     {
         geometry_msgs::PoseStamped pose_in;
         pose_in.header.frame_id = msg->header.frame_id;
