@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     double max;
     pn.param("max", max, 0.9);
     double height;
-    pn.param("height", height, -0.20);
+    pn.param("height", height, -0.10);
     double speed;
     pn.param("speed", speed, 0.2);
 
