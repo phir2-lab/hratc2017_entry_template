@@ -105,15 +105,12 @@ def sendMine():
 
     # Change middle coil position into world position
     try:    
-        (trans,rot) = transListener.lookupTransform('base_footprint', 'middle_coil', rospy.Time(0))
+        (trans,rot) = transListener.lookupTransform('minefield', 'middle_coil', rospy.Time(0))
     except:
         return
     cx, cy, cz = trans
-    q = (pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
-    roll, pitch, yaw = euler_from_quaternion(q)
-    minePose.pose.position.x = pose.position.x + cx*cos(yaw) - cy*sin(yaw)
-    minePose.pose.position.y = pose.position.y + cx*sin(yaw) + cy*cos(yaw)
-
+    minePose.pose.position.x=cx
+    minePose.pose.position.y=cy
     pubMine  = rospy.Publisher('/HRATC_FW/set_mine', PoseStamped)
     pubMine.publish(minePose)
     

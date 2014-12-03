@@ -39,7 +39,7 @@
 * an action server.
 *
 * With the simulator running:
-* rosrun hratc2014_entry_template sweep_node
+* rosrun hratc2015_entry_template sweep_node
 *
 *********************************************************************/
 

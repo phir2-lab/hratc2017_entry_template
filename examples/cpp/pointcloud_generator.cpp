@@ -40,7 +40,7 @@
 * point cloud by means of the laser assembler.
 *
 * With the simulator running:
-* roslaunch hratc2014_entry_template pointcloud_generator.launch
+* roslaunch hratc2015_entry_template pointcloud_generator.launch
 *
 *********************************************************************/
 
