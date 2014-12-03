@@ -89,7 +89,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES hratc2015_entry_template
-#  CATKIN_DEPENDS metal_detector_msgs rosccp rospy tf
+  CATKIN_DEPENDS metal_detector_msgs
 #  DEPENDS system_lib
 )
 
@@ -123,6 +123,7 @@ add_executable(get_global_odom_node examples/cpp/get_global_odom.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(hratc2015_entry_template_node hratc2015_entry_template_generate_messages_cpp)
+add_dependencies(read_metal_detector_node metal_detector_msgs_generate_messages_py)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(hratc2015_entry_template_node
