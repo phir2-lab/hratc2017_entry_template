@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package>
-  <name>hratc2015_entry_template</name>
+  <name>hratc2016_entry_template</name>
   <version>0.0.0</version>
-  <description>The hratc2015_entry_template package.</description>
+  <description>The hratc2016_entry_template package.</description>
 
   <maintainer email="goncabrita@gmail.com">Gonçalo Cabrita</maintainer>
 
   <license>BSD</license>
-  <url type="website">http://www.isr.uc.pt/~embedded/events/HRATC2015</url>
+  <url type="website">http://www.isr.uc.pt/~embedded/events/HRATC2016</url>
   <author email="goncabrita@gmail.com">Gonçalo Cabrita</author>
   
   <buildtool_depend>catkin</buildtool_depend>

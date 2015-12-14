@@ -39,7 +39,7 @@
 * found a mine!
 *
 * With the simulator running:
-* rosrun hratc2015_entry_template set_mine _x:=5.0 _y:=3.0
+* rosrun hratc2016_entry_template set_mine _x:=5.0 _y:=3.0
 *
 *********************************************************************/
 

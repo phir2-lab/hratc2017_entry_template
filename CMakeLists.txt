@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(hratc2015_entry_template)
+project(hratc2016_entry_template)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -88,7 +88,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES hratc2015_entry_template
+#  LIBRARIES hratc2016_entry_template
   CATKIN_DEPENDS metal_detector_msgs
 #  DEPENDS system_lib
 )
@@ -105,12 +105,12 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(hratc2015_entry_template
-#   src/${PROJECT_NAME}/hratc2015_entry_template.cpp
+# add_library(hratc2016_entry_template
+#   src/${PROJECT_NAME}/hratc2016_entry_template.cpp
 # )
 
 ## Declare a cpp executable
-# add_executable(hratc2015_entry_template_node src/hratc2015_entry_template_node.cpp)
+# add_executable(hratc2016_entry_template_node src/hratc2016_entry_template_node.cpp)
 add_executable(random_walk_navigation_node examples/cpp/random_walk_navigation.cpp)
 add_executable(random_walk_simple_node examples/cpp/random_walk_simple.cpp)
 add_executable(read_metal_detector_node examples/cpp/read_metal_detector.cpp)
@@ -121,11 +121,11 @@ add_executable(get_global_odom_node examples/cpp/get_global_odom.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(hratc2015_entry_template_node hratc2015_entry_template_generate_messages_cpp)
+# add_dependencies(hratc2016_entry_template_node hratc2016_entry_template_generate_messages_cpp)
 add_dependencies(read_metal_detector_node metal_detector_msgs_generate_messages_py)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(hratc2015_entry_template_node
+# target_link_libraries(hratc2016_entry_template_node
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(random_walk_navigation_node ${catkin_LIBRARIES})
@@ -151,7 +151,7 @@ target_link_libraries(get_global_odom_node ${catkin_LIBRARIES})
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS hratc2015_entry_template hratc2015_entry_template_node
+# install(TARGETS hratc2016_entry_template hratc2016_entry_template_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -176,7 +176,7 @@ target_link_libraries(get_global_odom_node ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_hratc2015_entry_template.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_hratc2016_entry_template.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
