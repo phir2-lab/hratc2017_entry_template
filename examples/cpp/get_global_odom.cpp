@@ -67,10 +67,10 @@ private:
     tf::MessageFilter<geometry_msgs::PoseWithCovarianceStamped> * tf_filter_;
     ros::NodeHandle n_;
     std::string target_frame_;
-
     //  Callback to register with tf::MessageFilter to be called when transforms are available
     void msgCallback(const boost::shared_ptr<const geometry_msgs::PoseWithCovarianceStamped>& msg)
     {
+        ROS_WARN("TESTE3\n");
         geometry_msgs::PoseStamped pose_in;
         pose_in.header.frame_id = msg->header.frame_id;
         pose_in.header.stamp = msg->header.stamp;
@@ -98,9 +98,9 @@ int main(int argc, char ** argv)
     ros::init(argc, argv, "get_global_odom");
 
     GlobalPose myPose;
-
+		ROS_WARN("TESTE\n");
     ros::spin();
-
+		ROS_WARN("TESTE22\n");
     return 0;
 };
 

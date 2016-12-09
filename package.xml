@@ -1,15 +1,21 @@
 <?xml version="1.0"?>
 <package>
-  <name>hratc2016_entry_template</name>
+  <name>hratc2017_entry_template</name>
   <version>0.0.0</version>
-  <description>The hratc2016_entry_template package.</description>
+  <description>The hratc2017_entry_template package.</description>
 
+  <maintainer email="rqmaffei@gmail.com">Renan Maffei</maintainer>
+  <maintainer email="mathiasfassini@gmail.com">Mathias Mantelli</maintainer>
+  <maintainer email="reneuland@gmail.com">Renata Neuland</maintainer>
+  <maintainer email="diegokindin@gmail.com">Diego Pittol</maintainer>
   <maintainer email="goncabrita@gmail.com">Gonçalo Cabrita</maintainer>
 
   <license>BSD</license>
-  <url type="website">http://www.isr.uc.pt/~embedded/events/HRATC2016</url>
+  <url type="website">http://www.inf.ufrgs.br/hratc2017/HRATC2017/Welcome.html</url>
   <author email="goncabrita@gmail.com">Gonçalo Cabrita</author>
-  
+  <author email="rqmaffei@gmail.com">Renan Maffei</author>
+
+
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>metal_detector_msgs</build_depend>
   <build_depend>roscpp</build_depend>
