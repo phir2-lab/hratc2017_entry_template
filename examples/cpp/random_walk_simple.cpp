@@ -85,9 +85,9 @@ private:
 
 Robot::Robot() : n_()
 {
-    cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/sim_p3at/cmd_vel", 10);
+    cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/p3at/cmd_vel", 10);
     laser_sub_ = n_.subscribe("scan", 10, &Robot::laserCallback, this);
-    odom_sub_ = n_.subscribe("odom", 10, &Robot::odomCallback, this);
+    odom_sub_ = n_.subscribe("/p3at/odom", 10, &Robot::odomCallback, this);
 
     obstacle_ = false;
 }
