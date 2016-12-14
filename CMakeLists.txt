@@ -115,7 +115,7 @@ include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO
 # add_executable(hratc2016_entry_template_node src/hratc2016_entry_template_node.cpp)
 add_executable(random_walk_simple_node examples/cpp/random_walk_simple.cpp)
 add_executable(set_mine_node examples/cpp/set_mine.cpp)
-add_executable(get_data_node examples/cpp/get_global_odom.cpp)
+add_executable(get_data_node examples/cpp/get_data.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes

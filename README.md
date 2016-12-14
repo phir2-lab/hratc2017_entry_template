@@ -29,5 +29,4 @@ Example:
 
  - cpp examples by Gonçalo Cabrita and Renan Maffei;
  - python examples by Guilherme Franco and Renan Maffei;
- - Readmes edits by Gonçalo Cabrita and Renan Maffei.
 
