@@ -6,6 +6,9 @@ project(hratc2017_entry_template)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   metal_detector_msgs
+  geometry_msgs
+  sensor_msgs
+  nav_msgs
   roscpp
   rospy
   tf
@@ -100,9 +103,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+link_directories(${GAZEBO_LIBRARY_DIRS})
+include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
 
 ## Declare a cpp library
 # add_library(hratc2016_entry_template
@@ -111,22 +113,22 @@ include_directories(
 
 ## Declare a cpp executable
 # add_executable(hratc2016_entry_template_node src/hratc2016_entry_template_node.cpp)
-add_executable(read_metal_detector_node examples/cpp/read_metal_detector.cpp)
+add_executable(random_walk_simple_node examples/cpp/random_walk_simple.cpp)
 add_executable(set_mine_node examples/cpp/set_mine.cpp)
-add_executable(get_global_odom_node examples/cpp/get_global_odom.cpp)
+add_executable(get_data_node examples/cpp/get_global_odom.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(hratc2016_entry_template_node hratc2016_entry_template_generate_messages_cpp)
-add_dependencies(read_metal_detector_node metal_detector_msgs_generate_messages_py)
+add_dependencies(get_data_node metal_detector_msgs_generate_messages_py)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(hratc2016_entry_template_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(read_metal_detector_node ${catkin_LIBRARIES})
+target_link_libraries(random_walk_simple_node ${catkin_LIBRARIES})
 target_link_libraries(set_mine_node ${catkin_LIBRARIES})
-target_link_libraries(get_global_odom_node ${catkin_LIBRARIES})
+target_link_libraries(get_data_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##

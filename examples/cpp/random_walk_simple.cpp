@@ -44,6 +44,7 @@
 *********************************************************************/
 
 #include <ros/ros.h>
+#include <tf/transform_listener.h>
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
@@ -86,7 +87,7 @@ private:
 Robot::Robot() : n_()
 {
     cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/p3at/cmd_vel", 10);
-    laser_sub_ = n_.subscribe("scan", 10, &Robot::laserCallback, this);
+    laser_sub_ = n_.subscribe("/scan", 10, &Robot::laserCallback, this);
     odom_sub_ = n_.subscribe("/p3at/odom", 10, &Robot::odomCallback, this);
 
     obstacle_ = false;
@@ -127,46 +128,15 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "random_walk_simple");
 
-    ROS_INFO("HRATC 2014 random walk example - Simple version");
+    ROS_INFO("HRATC 2017 random walk example - Simple version");
 
-    ros::NodeHandle n;
-    ros::NodeHandle pn("~");
-
-    double min_x;
-    double max_x;
-    double min_y;
-    double max_y;
-    double min_range;
-    double max_linear_speed;
-    double max_angular_speed;
-
-    pn.param("min_x", min_x, -10.0);
-    pn.param("max_x", max_x, 10.0);
-    pn.param("min_y", min_y, -10.0);
-    pn.param("max_y", max_y, 10.0);
-    pn.param("min_range", min_range, 3.0);
-    pn.param("max_linear_speed", max_linear_speed, 0.4);
-    pn.param("max_angular_speed", max_angular_speed, 0.2);
-
-    // Lets just make sure the laser is on the upright position, otherwise we might see the arm as an obstacle!
-    ros::Publisher ptu_d46_pub = n.advertise<trajectory_msgs::JointTrajectory>("/ptu_d46_controller/command", 10);
-
-    trajectory_msgs::JointTrajectory msg;
-    msg.header.stamp = ros::Time::now();
-    msg.points.resize(1);
-    msg.joint_names.push_back("ptu_d46_pan_joint");
-    msg.points[0].positions.push_back(0.0);
-    msg.points[0].velocities.push_back(0.8);
-    msg.points[0].accelerations.push_back(0.8);
-    msg.joint_names.push_back("ptu_d46_tilt_joint");
-    msg.points[0].positions.push_back(0.5);
-    msg.points[0].velocities.push_back(0.8);
-    msg.points[0].accelerations.push_back(0.8);
-    msg.points[0].time_from_start = ros::Duration(1.0);
-
-    ros::Duration(1.0).sleep();
-
-    ptu_d46_pub.publish(msg);
+    double min_x = -3;
+    double max_x = 3;
+    double min_y = -3;
+    double max_y = 3;
+    double min_range = 3.0;
+    double max_linear_speed = 0.4;
+    double max_angular_speed = 0.2;
 
     Robot robot;
     robot.setRangeLimit(min_range);
